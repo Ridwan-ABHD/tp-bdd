@@ -1,18 +1,13 @@
--- ============================================
--- Script de création du schéma de la base de données
--- Projet : Gestion de billetterie locale
+-- Schéma de la base de données - Billetterie locale
 -- Auteurs : Ridwan & Sébastien
--- ============================================
 
--- Suppression des tables si elles existent (ordre inverse des dépendances)
+-- Suppression des tables (ordre inverse des dépendances)
 DROP TABLE IF EXISTS ventes;
 DROP TABLE IF EXISTS types_billets;
 DROP TABLE IF EXISTS evenements;
 DROP TABLE IF EXISTS acheteurs;
 
--- ============================================
 -- Table des acheteurs
--- ============================================
 CREATE TABLE acheteurs (
     id_acheteur INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT NOT NULL,
@@ -22,9 +17,7 @@ CREATE TABLE acheteurs (
     date_inscription DATE DEFAULT CURRENT_DATE
 );
 
--- ============================================
 -- Table des événements
--- ============================================
 CREATE TABLE evenements (
     id_evenement INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT NOT NULL,
@@ -36,9 +29,7 @@ CREATE TABLE evenements (
     categorie TEXT CHECK(categorie IN ('concert', 'conference', 'spectacle')) NOT NULL
 );
 
--- ============================================
 -- Table des types de billets
--- ============================================
 CREATE TABLE types_billets (
     id_type_billet INTEGER PRIMARY KEY AUTOINCREMENT,
     id_evenement INTEGER NOT NULL,
@@ -48,9 +39,7 @@ CREATE TABLE types_billets (
     FOREIGN KEY (id_evenement) REFERENCES evenements(id_evenement) ON DELETE CASCADE
 );
 
--- ============================================
 -- Table des ventes
--- ============================================
 CREATE TABLE ventes (
     id_vente INTEGER PRIMARY KEY AUTOINCREMENT,
     id_acheteur INTEGER NOT NULL,
@@ -62,9 +51,7 @@ CREATE TABLE ventes (
     FOREIGN KEY (id_type_billet) REFERENCES types_billets(id_type_billet)
 );
 
--- ============================================
--- Index pour améliorer les performances
--- ============================================
+-- Index pour les performances
 CREATE INDEX idx_ventes_date ON ventes(date_vente);
 CREATE INDEX idx_ventes_acheteur ON ventes(id_acheteur);
 CREATE INDEX idx_evenements_date ON evenements(date_evenement);

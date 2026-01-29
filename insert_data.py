@@ -1,43 +1,25 @@
-"""
-Script d'insertion automatique de données de test
-Projet : Gestion de billetterie locale
-Auteurs : Ridwan & Sébastien
+# Script d'insertion de données de test
+# Auteurs : Ridwan & Sébastien
 
-Ce script peuple la base de données avec des données réalistes pour les tests
-"""
-
-from dao import (
-    init_database, 
-    AcheteurDAO, EvenementDAO, TypeBilletDAO, VenteDAO,
-    DatabaseConnection
-)
+from dao import init_database, AcheteurDAO, EvenementDAO, TypeBilletDAO, VenteDAO, DatabaseConnection
 from datetime import datetime, timedelta
 import random
 
 
-def inserer_donnees_test():
+def inserer_donnees():
     """Insère des données de test dans la base"""
     
-    print("=" * 60)
-    print("🚀 INSERTION DES DONNÉES DE TEST")
-    print("=" * 60)
-    
-    # Initialiser la base de données (crée les tables)
-    print("\n📦 Initialisation de la base de données...")
+    print("Initialisation de la base...")
     init_database()
     
-    # Instancier les DAOs
     acheteur_dao = AcheteurDAO()
     evenement_dao = EvenementDAO()
     type_billet_dao = TypeBilletDAO()
     vente_dao = VenteDAO()
     
-    # ============================================
-    # 1. Insertion des acheteurs
-    # ============================================
-    print("\n👥 Insertion des acheteurs...")
-    
-    acheteurs_data = [
+    # Acheteurs
+    print("Insertion des acheteurs...")
+    acheteurs = [
         ("Dupont", "Marie", "marie.dupont@email.com", "0612345678"),
         ("Martin", "Jean", "jean.martin@email.com", "0698765432"),
         ("Bernard", "Sophie", "sophie.bernard@email.com", "0645678901"),
@@ -50,124 +32,73 @@ def inserer_donnees_test():
         ("Roux", "Nathan", "nathan.roux@email.com", "0665432109"),
     ]
     
-    acheteurs_ids = []
-    for nom, prenom, email, tel in acheteurs_data:
-        id_acheteur = acheteur_dao.create(nom, prenom, email, tel)
-        acheteurs_ids.append(id_acheteur)
-        print(f"   ✓ {prenom} {nom} (ID: {id_acheteur})")
+    ids_acheteurs = []
+    for nom, prenom, email, tel in acheteurs:
+        id_a = acheteur_dao.create(nom, prenom, email, tel)
+        ids_acheteurs.append(id_a)
+    print(f"  {len(ids_acheteurs)} acheteurs créés")
     
-    # ============================================
-    # 2. Insertion des événements
-    # ============================================
-    print("\n🎭 Insertion des événements...")
-    
-    # Dates pour les événements (passés et futurs)
+    # Événements
+    print("Insertion des événements...")
     today = datetime.now()
     
-    evenements_data = [
-        # Concerts
-        ("Concert Rock Night", "Soirée rock avec plusieurs groupes locaux", 
-         (today + timedelta(days=30)).strftime("%Y-%m-%d"), "20:00", "Salle des Fêtes", 500, "concert"),
-        ("Jazz en Ville", "Festival de jazz acoustique", 
-         (today + timedelta(days=45)).strftime("%Y-%m-%d"), "19:30", "Place du Marché", 300, "concert"),
-        ("Électro Party", "Nuit électro avec DJs internationaux", 
-         (today + timedelta(days=60)).strftime("%Y-%m-%d"), "22:00", "Hangar 42", 800, "concert"),
-        
-        # Conférences
-        ("Tech Summit 2026", "Conférence sur l'IA et le futur du travail", 
-         (today + timedelta(days=15)).strftime("%Y-%m-%d"), "09:00", "Centre des Congrès", 200, "conference"),
-        ("Développement Durable", "Forum sur l'écologie et l'innovation", 
-         (today + timedelta(days=25)).strftime("%Y-%m-%d"), "10:00", "Maison de l'Environnement", 150, "conference"),
-        
-        # Spectacles
-        ("Cirque Moderne", "Spectacle de cirque contemporain", 
-         (today + timedelta(days=20)).strftime("%Y-%m-%d"), "15:00", "Chapiteau Central", 400, "spectacle"),
-        ("Comédie Musicale", "Les Misérables - Version locale", 
-         (today + timedelta(days=35)).strftime("%Y-%m-%d"), "20:30", "Théâtre Municipal", 350, "spectacle"),
-        ("One Man Show", "Humoriste local en représentation", 
-         (today + timedelta(days=10)).strftime("%Y-%m-%d"), "21:00", "Café Théâtre", 100, "spectacle"),
+    evenements = [
+        ("Concert Rock Night", "Soirée rock", (today + timedelta(days=30)).strftime("%Y-%m-%d"), 
+         "20:00", "Salle des Fêtes", 500, "concert"),
+        ("Jazz en Ville", "Festival jazz", (today + timedelta(days=45)).strftime("%Y-%m-%d"), 
+         "19:30", "Place du Marché", 300, "concert"),
+        ("Électro Party", "Nuit électro", (today + timedelta(days=60)).strftime("%Y-%m-%d"), 
+         "22:00", "Hangar 42", 800, "concert"),
+        ("Tech Summit", "Conférence IA", (today + timedelta(days=15)).strftime("%Y-%m-%d"), 
+         "09:00", "Centre des Congrès", 200, "conference"),
+        ("Forum Écologie", "Développement durable", (today + timedelta(days=25)).strftime("%Y-%m-%d"), 
+         "10:00", "Maison Environnement", 150, "conference"),
+        ("Cirque Moderne", "Spectacle contemporain", (today + timedelta(days=20)).strftime("%Y-%m-%d"), 
+         "15:00", "Chapiteau", 400, "spectacle"),
+        ("Comédie Musicale", "Les Misérables", (today + timedelta(days=35)).strftime("%Y-%m-%d"), 
+         "20:30", "Théâtre Municipal", 350, "spectacle"),
+        ("One Man Show", "Humour", (today + timedelta(days=10)).strftime("%Y-%m-%d"), 
+         "21:00", "Café Théâtre", 100, "spectacle"),
     ]
     
-    evenements_ids = []
-    for nom, desc, date, heure, lieu, capacite, categorie in evenements_data:
-        id_evenement = evenement_dao.create(nom, desc, date, heure, lieu, capacite, categorie)
-        evenements_ids.append(id_evenement)
-        print(f"   ✓ {nom} - {categorie} (ID: {id_evenement})")
+    ids_evenements = []
+    for nom, desc, date, heure, lieu, cap, cat in evenements:
+        id_e = evenement_dao.create(nom, desc, date, heure, lieu, cap, cat)
+        ids_evenements.append((id_e, cap, cat))
+    print(f"  {len(ids_evenements)} événements créés")
     
-    # ============================================
-    # 3. Insertion des types de billets
-    # ============================================
-    print("\n🎫 Insertion des types de billets...")
-    
-    types_billets_ids = []
-    
-    # Pour chaque événement, créer des types de billets
-    types_par_categorie = {
-        "concert": [
-            ("Standard", 25.00, 0.6),
-            ("VIP", 50.00, 0.2),
-            ("Early Bird", 20.00, 0.2),
-        ],
-        "conference": [
-            ("Entrée Simple", 15.00, 0.5),
-            ("Pass Journée", 35.00, 0.3),
-            ("Pass VIP", 75.00, 0.2),
-        ],
-        "spectacle": [
-            ("Placement Libre", 18.00, 0.5),
-            ("Catégorie 1", 30.00, 0.3),
-            ("Catégorie Premium", 45.00, 0.2),
-        ],
+    # Types de billets
+    print("Insertion des types de billets...")
+    types_par_cat = {
+        "concert": [("Standard", 25.00, 0.6), ("VIP", 50.00, 0.2), ("Early Bird", 20.00, 0.2)],
+        "conference": [("Simple", 15.00, 0.5), ("Journée", 35.00, 0.3), ("VIP", 75.00, 0.2)],
+        "spectacle": [("Libre", 18.00, 0.5), ("Cat.1", 30.00, 0.3), ("Premium", 45.00, 0.2)],
     }
     
-    for i, id_evenement in enumerate(evenements_ids):
-        categorie = evenements_data[i][6]
-        capacite = evenements_data[i][5]
-        
-        for nom_type, prix, ratio in types_par_categorie[categorie]:
+    ids_types = []
+    for id_evt, capacite, categorie in ids_evenements:
+        for nom_type, prix, ratio in types_par_cat[categorie]:
             quantite = int(capacite * ratio)
-            id_type = type_billet_dao.create(id_evenement, nom_type, prix, quantite)
-            types_billets_ids.append((id_type, prix))
-            print(f"   ✓ {evenements_data[i][0]} - {nom_type}: {prix}€ x {quantite}")
+            id_t = type_billet_dao.create(id_evt, nom_type, prix, quantite)
+            ids_types.append((id_t, prix))
+    print(f"  {len(ids_types)} types de billets créés")
     
-    # ============================================
-    # 4. Insertion des ventes
-    # ============================================
-    print("\n💳 Insertion des ventes...")
-    
-    ventes_count = 0
-    
-    # Générer des ventes aléatoires mais réalistes
-    for _ in range(50):  # 50 ventes
-        id_acheteur = random.choice(acheteurs_ids)
-        id_type_billet, prix = random.choice(types_billets_ids)
+    # Ventes
+    print("Insertion des ventes...")
+    nb_ventes = 0
+    for _ in range(50):
+        id_acheteur = random.choice(ids_acheteurs)
+        id_type, prix = random.choice(ids_types)
         quantite = random.randint(1, 4)
-        montant_total = prix * quantite
-        
-        try:
-            id_vente = vente_dao.create(id_acheteur, id_type_billet, quantite, montant_total)
-            ventes_count += 1
-            print(f"   ✓ Vente #{id_vente}: {quantite} billet(s) pour {montant_total:.2f}€")
-        except Exception as e:
-            print(f"   ✗ Erreur: {e}")
+        montant = prix * quantite
+        vente_dao.create(id_acheteur, id_type, quantite, montant)
+        nb_ventes += 1
+    print(f"  {nb_ventes} ventes créées")
     
-    # ============================================
-    # Résumé
-    # ============================================
-    print("\n" + "=" * 60)
-    print("✅ INSERTION TERMINÉE")
-    print("=" * 60)
-    print(f"   • {len(acheteurs_ids)} acheteurs créés")
-    print(f"   • {len(evenements_ids)} événements créés")
-    print(f"   • {len(types_billets_ids)} types de billets créés")
-    print(f"   • {ventes_count} ventes enregistrées")
-    print("=" * 60)
-    
-    # Fermer la connexion proprement
-    db = DatabaseConnection()
-    db.close()
-    print("\n🔒 Connexion fermée proprement")
+    # Fermeture
+    DatabaseConnection().close()
+    print("\nTerminé !")
 
 
 if __name__ == "__main__":
-    inserer_donnees_test()
+    inserer_donnees()
