@@ -1,5 +1,6 @@
-# Services - Logique métier
-# Auteurs : Ridwan & Sébastien
+# services.py - Ridwan & Sébastien
+# C'est la couche "métier" : on gère la logique de l'application ici
+# Elle fait le lien entre l'interface graphique et les requêtes SQL (dao.py)
 
 from dao import (AcheteurDAO, EvenementDAO, TypeBilletDAO, VenteDAO, 
                  StatsDAO, DatabaseConnection, init_database)
@@ -7,23 +8,33 @@ from datetime import datetime
 
 
 class BilletterieService:
-    """Service principal de gestion de la billetterie"""
+    """
+    Le service principal de l'application
+    C'est lui qui vérifie les données avant de les envoyer à la base
+    """
     
     def __init__(self):
+        # On crée les objets DAO pour accéder aux données
         self.acheteur_dao = AcheteurDAO()
         self.evenement_dao = EvenementDAO()
         self.type_billet_dao = TypeBilletDAO()
         self.vente_dao = VenteDAO()
         self.stats_dao = StatsDAO()
     
-    # --- Acheteurs ---
+    # =====================
+    # Gestion des acheteurs
+    # =====================
     
     def inscrire_acheteur(self, nom, prenom, email, telephone=None):
-        """Inscrit un acheteur avec validation"""
+        # On vérifie que les champs obligatoires sont remplis
         if not nom or not prenom or not email:
             return {"success": False, "error": "Nom, prénom et email obligatoires"}
+        
+        # Vérification basique de l'email
         if "@" not in email:
             return {"success": False, "error": "Email invalide"}
+        
+        # On vérifie que l'email n'est pas déjà pris
         if self.acheteur_dao.get_by_email(email):
             return {"success": False, "error": "Email déjà utilisé"}
         
@@ -34,17 +45,23 @@ class BilletterieService:
             return {"success": False, "error": str(e)}
     
     def lister_acheteurs(self):
+        # Transforme les résultats en liste de dictionnaires
         return [dict(a) for a in self.acheteur_dao.get_all()]
     
-    # --- Événements ---
+    # =====================
+    # Gestion des événements
+    # =====================
     
     def creer_evenement(self, nom, description, date_evenement, heure_debut, 
                         lieu, capacite_max, categorie):
-        """Crée un événement avec validation"""
+        # Vérifications de base
         if not nom or not date_evenement or not lieu:
             return {"success": False, "error": "Nom, date et lieu obligatoires"}
+        
+        # La catégorie doit être dans la liste autorisée
         if categorie not in ['concert', 'conference', 'spectacle']:
             return {"success": False, "error": "Catégorie invalide"}
+        
         if capacite_max <= 0:
             return {"success": False, "error": "Capacité doit être positive"}
         
@@ -62,14 +79,17 @@ class BilletterieService:
     def lister_evenements_par_categorie(self, categorie):
         return [dict(e) for e in self.evenement_dao.get_by_categorie(categorie)]
     
-    # --- Types de billets ---
+    # =====================
+    # Gestion des billets
+    # =====================
     
     def creer_type_billet(self, id_evenement, nom_type, prix, quantite):
-        """Crée un type de billet"""
         if prix < 0:
             return {"success": False, "error": "Prix négatif interdit"}
         if quantite <= 0:
             return {"success": False, "error": "Quantité doit être positive"}
+        
+        # On vérifie que l'événement existe
         if not self.evenement_dao.get_by_id(id_evenement):
             return {"success": False, "error": "Événement introuvable"}
         
@@ -82,27 +102,36 @@ class BilletterieService:
     def lister_types_billets_evenement(self, id_evenement):
         return [dict(t) for t in self.type_billet_dao.get_by_evenement(id_evenement)]
     
-    # --- Ventes ---
+    # =====================
+    # Gestion des ventes
+    # =====================
     
     def effectuer_vente(self, id_acheteur, id_type_billet, quantite):
-        """Effectue une vente avec vérifications"""
+        # On vérifie que l'acheteur existe
         acheteur = self.acheteur_dao.get_by_id(id_acheteur)
         if not acheteur:
             return {"success": False, "error": "Acheteur introuvable"}
         
+        # On vérifie que le type de billet existe
         type_billet = self.type_billet_dao.get_by_id(id_type_billet)
         if not type_billet:
             return {"success": False, "error": "Type de billet introuvable"}
         
+        # On vérifie qu'il reste assez de billets en stock
         if type_billet['quantite_disponible'] < quantite:
             return {"success": False, "error": f"Stock insuffisant ({type_billet['quantite_disponible']} dispo)"}
         
+        # Calcul du prix total
         montant_total = type_billet['prix'] * quantite
         
         try:
+            # On enregistre la vente
             id_vente = self.vente_dao.create(id_acheteur, id_type_billet, quantite, montant_total)
+            
+            # On met à jour le stock (on enlève les billets vendus)
             nouvelle_qte = type_billet['quantite_disponible'] - quantite
             self.type_billet_dao.update_quantite(id_type_billet, nouvelle_qte)
+            
             return {"success": True, "id_vente": id_vente, "montant_total": montant_total}
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -110,9 +139,12 @@ class BilletterieService:
     def lister_ventes(self):
         return [dict(v) for v in self.vente_dao.get_all()]
     
-    # --- Statistiques ---
+    # =====================
+    # Statistiques
+    # =====================
     
     def calculer_chiffre_affaires_total(self):
+        # On récupère le CA et le nombre de billets vendus
         ca = self.stats_dao.get_chiffre_affaires_total()
         qte = self.stats_dao.get_quantite_totale_vendue()
         return {
@@ -137,15 +169,19 @@ class BilletterieService:
         return [dict(r) for r in self.stats_dao.get_ventes_par_categorie()]
     
     def calculer_indicateurs_avances(self):
-        """Calculs avancés côté Python"""
+        # Ici on fait des calculs en Python (pas en SQL)
+        # C'est pour montrer qu'on peut aussi traiter les données côté code
         ca = self.stats_dao.get_chiffre_affaires_total()
         qte = self.stats_dao.get_quantite_totale_vendue()
         ca_evt = self.calculer_ca_par_evenement()
         taux = self.calculer_taux_remplissage()
         
         if ca_evt:
+            # Calcul de la moyenne des CA
             ca_moyen = sum(e['chiffre_affaires'] for e in ca_evt) / len(ca_evt)
+            # On trouve l'événement avec le plus gros CA
             top_evt = max(ca_evt, key=lambda x: x['chiffre_affaires'])
+            # Moyenne des taux de remplissage
             taux_moyen = sum(t['taux_remplissage'] for t in taux) / len(taux)
         else:
             ca_moyen, top_evt, taux_moyen = 0, None, 0
@@ -161,4 +197,5 @@ class BilletterieService:
         }
     
     def fermer_connexion(self):
+        # On ferme proprement la connexion à la base
         DatabaseConnection().close()

@@ -1,39 +1,52 @@
-# DAO (Data Access Object) - Accès aux données
-# Auteurs : Ridwan & Sébastien
-# Toutes les requêtes sont paramétrées pour éviter les injections SQL
+# dao.py - Ridwan & Sébastien
+# C'est ici qu'on fait toutes les requêtes SQL vers la base de données
+# On utilise des ? dans les requêtes pour éviter les injections SQL (c'est important!)
 
 import sqlite3
 from config import DATABASE_PATH, SCHEMA_PATH
 
 
+# ===========================================
+# Connexion à la base de données
+# ===========================================
+
 class DatabaseConnection:
-    """Connexion unique à la base (Singleton)"""
+    """
+    On utilise un Singleton pour avoir une seule connexion à la base
+    Ca évite d'ouvrir plein de connexions en même temps
+    """
     _instance = None
     
     def __new__(cls):
+        # Si on n'a pas encore créé d'instance, on en crée une
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.connection = None
         return cls._instance
     
     def get_connection(self):
+        # On ouvre la connexion si elle n'existe pas encore
         if self.connection is None:
             self.connection = sqlite3.connect(DATABASE_PATH)
+            # Ca permet d'accéder aux colonnes par leur nom (plus pratique)
             self.connection.row_factory = sqlite3.Row
+            # On active les clés étrangères (sinon SQLite les ignore)
             self.connection.execute("PRAGMA foreign_keys = ON")
         return self.connection
     
     def close(self):
+        # On ferme proprement la connexion
         if self.connection:
             self.connection.close()
             self.connection = None
 
 
 def init_database():
-    """Initialise la base avec le schéma SQL"""
+    """Crée les tables en exécutant le fichier schema.sql"""
     db = DatabaseConnection()
     conn = db.get_connection()
     try:
+        # On lit le fichier SQL et on l'exécute
         with open(SCHEMA_PATH, 'r', encoding='utf-8') as f:
             conn.executescript(f.read())
         conn.commit()
@@ -44,13 +57,17 @@ def init_database():
         return False
 
 
+# ===========================================
+# DAO Acheteurs - pour gérer les clients
+# ===========================================
+
 class AcheteurDAO:
-    """CRUD pour les acheteurs"""
     
     def __init__(self):
         self.db = DatabaseConnection()
     
     def create(self, nom, prenom, email, telephone=None):
+        # Ajoute un nouvel acheteur dans la base
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
@@ -58,34 +75,41 @@ class AcheteurDAO:
             (nom, prenom, email, telephone)
         )
         conn.commit()
-        return cursor.lastrowid
+        return cursor.lastrowid  # On retourne l'ID du nouvel acheteur
     
     def get_by_id(self, id_acheteur):
+        # Cherche un acheteur par son ID
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM acheteurs WHERE id_acheteur = ?", (id_acheteur,))
         return cursor.fetchone()
     
     def get_by_email(self, email):
+        # Cherche un acheteur par son email (pour vérifier s'il existe déjà)
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM acheteurs WHERE email = ?", (email,))
         return cursor.fetchone()
     
     def get_all(self):
+        # Récupère tous les acheteurs, triés par nom
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM acheteurs ORDER BY nom, prenom")
         return cursor.fetchall()
 
 
+# ===========================================
+# DAO Evenements - pour gérer les events
+# ===========================================
+
 class EvenementDAO:
-    """CRUD pour les événements"""
     
     def __init__(self):
         self.db = DatabaseConnection()
     
     def create(self, nom, description, date_evenement, heure_debut, lieu, capacite_max, categorie):
+        # Crée un nouvel événement
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
@@ -104,12 +128,14 @@ class EvenementDAO:
         return cursor.fetchone()
     
     def get_all(self):
+        # Liste tous les événements triés par date
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM evenements ORDER BY date_evenement")
         return cursor.fetchall()
     
     def get_by_categorie(self, categorie):
+        # Filtre les événements par catégorie (concert, spectacle, etc.)
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
@@ -119,13 +145,17 @@ class EvenementDAO:
         return cursor.fetchall()
 
 
+# ===========================================
+# DAO Types de billets - les différents tarifs
+# ===========================================
+
 class TypeBilletDAO:
-    """CRUD pour les types de billets"""
     
     def __init__(self):
         self.db = DatabaseConnection()
     
     def create(self, id_evenement, nom_type, prix, quantite_disponible):
+        # Crée un nouveau type de billet pour un événement
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
@@ -143,6 +173,7 @@ class TypeBilletDAO:
         return cursor.fetchone()
     
     def get_by_evenement(self, id_evenement):
+        # Récupère tous les types de billets pour un événement donné
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
@@ -152,6 +183,7 @@ class TypeBilletDAO:
         return cursor.fetchall()
     
     def update_quantite(self, id_type_billet, nouvelle_quantite):
+        # Met à jour le stock de billets après une vente
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
@@ -161,13 +193,17 @@ class TypeBilletDAO:
         conn.commit()
 
 
+# ===========================================
+# DAO Ventes - les achats de billets
+# ===========================================
+
 class VenteDAO:
-    """CRUD pour les ventes"""
     
     def __init__(self):
         self.db = DatabaseConnection()
     
     def create(self, id_acheteur, id_type_billet, quantite, montant_total):
+        # Enregistre une nouvelle vente
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
@@ -179,7 +215,8 @@ class VenteDAO:
         return cursor.lastrowid
     
     def get_all(self):
-        """Récupère les ventes avec jointures"""
+        # Récupère toutes les ventes avec les infos liées (jointures)
+        # On fait des JOIN pour avoir le nom de l'acheteur, l'événement, etc.
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
@@ -196,28 +233,31 @@ class VenteDAO:
         return cursor.fetchall()
 
 
+# ===========================================
+# DAO Stats - pour les statistiques et calculs
+# ===========================================
+
 class StatsDAO:
-    """Requêtes statistiques avec agrégats"""
     
     def __init__(self):
         self.db = DatabaseConnection()
     
     def get_chiffre_affaires_total(self):
-        """SUM du chiffre d'affaires"""
+        # Calcule le CA total avec SUM()
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT COALESCE(SUM(montant_total), 0) as ca FROM ventes")
         return cursor.fetchone()['ca']
     
     def get_quantite_totale_vendue(self):
-        """SUM des billets vendus"""
+        # Compte le nombre total de billets vendus
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT COALESCE(SUM(quantite), 0) as total FROM ventes")
         return cursor.fetchone()['total']
     
     def get_chiffre_affaires_par_evenement(self):
-        """CA par événement avec GROUP BY"""
+        # CA par événement - on utilise GROUP BY pour regrouper
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
@@ -233,7 +273,7 @@ class StatsDAO:
         return cursor.fetchall()
     
     def get_taux_remplissage_par_evenement(self):
-        """Taux de remplissage avec calcul"""
+        # Calcule le % de places vendues pour chaque événement
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
@@ -249,7 +289,7 @@ class StatsDAO:
         return cursor.fetchall()
     
     def get_top_billets(self):
-        """Types de billets les plus vendus"""
+        # Classement des types de billets les plus vendus
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
@@ -265,7 +305,7 @@ class StatsDAO:
         return cursor.fetchall()
     
     def get_top_acheteurs(self, limit=5):
-        """Top acheteurs par montant dépensé"""
+        # Top des meilleurs clients
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
@@ -282,7 +322,7 @@ class StatsDAO:
         return cursor.fetchall()
     
     def get_ventes_par_categorie(self):
-        """Ventes par catégorie d'événement"""
+        # Stats par catégorie (concert, spectacle, conférence)
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
