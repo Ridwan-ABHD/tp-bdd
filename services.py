@@ -116,8 +116,8 @@ class BilletterieService:
         ca = self.stats_dao.get_chiffre_affaires_total()
         qte = self.stats_dao.get_quantite_totale_vendue()
         return {
-            "chiffre_affaires": ca,
-            "billets_vendus": qte,
+            "chiffre_affaires_total": ca,
+            "quantite_totale_vendue": qte,
             "panier_moyen": round(ca / qte, 2) if qte > 0 else 0
         }
     
@@ -152,12 +152,12 @@ class BilletterieService:
         
         return {
             "chiffre_affaires_total": ca,
-            "billets_vendus": qte,
-            "prix_moyen": round(ca / qte, 2) if qte > 0 else 0,
-            "ca_moyen_evenement": round(ca_moyen, 2),
-            "taux_moyen": round(taux_moyen, 2),
-            "top_evenement": top_evt['evenement'] if top_evt else "Aucun",
-            "date": datetime.now().strftime("%Y-%m-%d %H:%M")
+            "quantite_totale": qte,
+            "prix_moyen_billet": round(ca / qte, 2) if qte > 0 else 0,
+            "ca_moyen_par_evenement": round(ca_moyen, 2),
+            "taux_remplissage_moyen": round(taux_moyen, 2),
+            "evenement_top": top_evt['evenement'] if top_evt else "Aucun",
+            "date_analyse": datetime.now().strftime("%Y-%m-%d %H:%M")
         }
     
     def fermer_connexion(self):

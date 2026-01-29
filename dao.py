@@ -221,7 +221,7 @@ class StatsDAO:
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT e.id_evenement, e.nom AS evenement, e.categorie,
+            SELECT e.id_evenement, e.nom AS evenement, e.date_evenement, e.categorie,
                    COALESCE(SUM(v.montant_total), 0) AS chiffre_affaires,
                    COALESCE(SUM(v.quantite), 0) AS billets_vendus
             FROM evenements e
