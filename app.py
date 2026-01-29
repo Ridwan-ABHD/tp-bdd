@@ -491,9 +491,22 @@ class BilletterieApp:
     def __init__(self, root):
         self.root = root
         self.root.title("🎫 BILLETTERIE PRO | Ridwan & Sébastien")
-        self.root.geometry("1200x800")
+        
+        # On récupère la taille de l'écran pour s'adapter
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        
+        # Taille de la fenêtre = 85% de l'écran
+        win_width = min(1400, int(screen_width * 0.85))
+        win_height = min(900, int(screen_height * 0.85))
+        
+        # Position centrée
+        x = (screen_width - win_width) // 2
+        y = (screen_height - win_height) // 2
+        
+        self.root.geometry(f"{win_width}x{win_height}+{x}+{y}")
         self.root.configure(bg=Colors.BG_DARK)
-        self.root.minsize(1000, 700)
+        self.root.minsize(800, 600)
         
         # Service métier
         self.service = BilletterieService()
@@ -586,17 +599,33 @@ class BilletterieApp:
                 bg=Colors.BG_DARKER, fg=Colors.TEXT_MUTED).pack(side=tk.LEFT, padx=(5, 0))
     
     def create_sidebar(self, parent):
-        """Sidebar avec les boutons d'action"""
-        sidebar = tk.Frame(parent, bg=Colors.BG_CARD, width=280)
-        sidebar.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 20))
-        sidebar.pack_propagate(False)
+        """Sidebar avec les boutons d'action - responsive avec scrollbar"""
+        # Frame conteneur pour la sidebar
+        sidebar_container = tk.Frame(parent, bg=Colors.BG_CARD)
+        sidebar_container.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 20))
         
-        # Scroll frame pour les boutons
-        canvas = tk.Canvas(sidebar, bg=Colors.BG_CARD, highlightthickness=0)
-        canvas.pack(fill=tk.BOTH, expand=True)
+        # Canvas avec scrollbar pour les petits écrans
+        canvas = tk.Canvas(sidebar_container, bg=Colors.BG_CARD, 
+                          highlightthickness=0, width=250)
+        scrollbar = tk.Scrollbar(sidebar_container, orient="vertical", 
+                                command=canvas.yview)
         
         button_frame = tk.Frame(canvas, bg=Colors.BG_CARD)
+        
+        # Configuration du scroll
+        button_frame.bind("<Configure>", 
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        
         canvas.create_window((0, 0), window=button_frame, anchor=tk.NW)
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Scroll avec la molette
+        def on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        canvas.bind_all("<MouseWheel>", on_mousewheel)
+        
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
         # ═══════════════════════════════════════
         # SECTION: GESTION
@@ -1128,9 +1157,18 @@ class ModernVenteDialog(tk.Toplevel):
         
         # Configuration de la fenêtre
         self.title("➕ Nouvelle Vente")
-        self.geometry("400x350")
         self.configure(bg=Colors.BG_DARK)
-        self.resizable(False, False)
+        
+        # Taille adaptée à l'écran
+        screen_w = parent.winfo_screenwidth()
+        screen_h = parent.winfo_screenheight()
+        dialog_w = min(450, int(screen_w * 0.35))
+        dialog_h = min(450, int(screen_h * 0.5))
+        x = (screen_w - dialog_w) // 2
+        y = (screen_h - dialog_h) // 2
+        self.geometry(f"{dialog_w}x{dialog_h}+{x}+{y}")
+        self.resizable(True, True)
+        self.minsize(350, 380)
         
         # Centrer la fenêtre
         self.transient(parent)
