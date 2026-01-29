@@ -231,6 +231,26 @@ class VenteDAO:
             ORDER BY v.date_vente DESC
         """)
         return cursor.fetchall()
+    
+    def get_by_id(self, id_vente):
+        # Récupère une vente par son ID (pour la suppression)
+        conn = self.db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT v.*, tb.prix 
+            FROM ventes v
+            JOIN types_billets tb ON v.id_type_billet = tb.id_type_billet
+            WHERE v.id_vente = ?
+        """, (id_vente,))
+        return cursor.fetchone()
+    
+    def delete(self, id_vente):
+        # Supprime une vente de la base
+        conn = self.db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM ventes WHERE id_vente = ?", (id_vente,))
+        conn.commit()
+        return cursor.rowcount > 0  # True si ça a supprimé quelque chose
 
 
 # ===========================================

@@ -139,6 +139,25 @@ class BilletterieService:
     def lister_ventes(self):
         return [dict(v) for v in self.vente_dao.get_all()]
     
+    def annuler_vente(self, id_vente):
+        # On vérifie que la vente existe avant de la supprimer
+        vente = self.vente_dao.get_by_id(id_vente)
+        if not vente:
+            return {"success": False, "error": "Vente introuvable"}
+        
+        try:
+            # On remet les billets en stock avant de supprimer
+            type_billet = self.type_billet_dao.get_by_id(vente['id_type_billet'])
+            if type_billet:
+                nouvelle_qte = type_billet['quantite_disponible'] + vente['quantite']
+                self.type_billet_dao.update_quantite(vente['id_type_billet'], nouvelle_qte)
+            
+            # On supprime la vente
+            self.vente_dao.delete(id_vente)
+            return {"success": True, "message": f"Vente #{id_vente} supprimée"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
     # =====================
     # Statistiques
     # =====================

@@ -606,8 +606,14 @@ class BilletterieApp:
         GlowButton(button_frame, "➕  Ajouter Vente", 
                   self.ajouter_vente, Colors.SUCCESS).pack(pady=5, padx=15)
         
+        GlowButton(button_frame, "�️  Supprimer Vente", 
+                  self.supprimer_vente, Colors.ACCENT).pack(pady=5, padx=15)
+        
         GlowButton(button_frame, "📜  Lister Ventes", 
                   self.lister_ventes, Colors.PRIMARY).pack(pady=5, padx=15)
+        
+        GlowButton(button_frame, "🔄  Rafraîchir", 
+                  self.rafraichir_affichage, Colors.SECONDARY).pack(pady=5, padx=15)
         
         GlowButton(button_frame, "🎭  Événements", 
                   self.lister_evenements, Colors.SECONDARY).pack(pady=5, padx=15)
@@ -804,6 +810,60 @@ class BilletterieApp:
     # ============================================
     # 🎯 ACTIONS (même logique, juste affichage amélioré)
     # ============================================
+    
+    def rafraichir_affichage(self):
+        """Rafraîchit les stats et la liste des ventes"""
+        self.set_status("Rafraîchissement...", "info")
+        self.load_initial_stats()
+        self.lister_ventes()
+        self.set_status("Affichage rafraîchi!", "success")
+    
+    def supprimer_vente(self):
+        """Supprime une vente après confirmation"""
+        self.set_status("Suppression d'une vente...", "info")
+        
+        # On demande l'ID de la vente à supprimer
+        id_str = simpledialog.askstring(
+            "Supprimer une vente", 
+            "Entrez l'ID de la vente à supprimer:",
+            parent=self.root
+        )
+        
+        if id_str is None:
+            self.set_status("Opération annulée", "warning")
+            return
+        
+        try:
+            id_vente = int(id_str)
+        except ValueError:
+            messagebox.showerror("Erreur", "L'ID doit être un nombre entier")
+            return
+        
+        # Confirmation avant suppression
+        confirm = messagebox.askyesno(
+            "Confirmer la suppression",
+            f"Voulez-vous vraiment supprimer la vente #{id_vente} ?\n\n(Les billets seront remis en stock)"
+        )
+        
+        if confirm:
+            result = self.service.annuler_vente(id_vente)
+            
+            if result['success']:
+                self.set_status(f"Vente #{id_vente} supprimée!", "success")
+                self.load_initial_stats()
+                
+                self.result_text.delete("1.0", tk.END)
+                self.result_text.insert(tk.END, "🗑️ VENTE SUPPRIMÉE\n", "title")
+                self.result_text.insert(tk.END, "━" * 50 + "\n\n", "muted")
+                self.result_text.insert(tk.END, f"La vente ", "")
+                self.result_text.insert(tk.END, f"#{id_vente}", "number")
+                self.result_text.insert(tk.END, f" a été supprimée.\n\n", "")
+                self.result_text.insert(tk.END, "Les billets ont été remis en stock.", "success")
+            else:
+                self.set_status("Erreur lors de la suppression", "error")
+                messagebox.showerror("Erreur", result['error'])
+        else:
+            self.set_status("Suppression annulée", "warning")
     
     def ajouter_vente(self):
         """Ajoute une vente"""
