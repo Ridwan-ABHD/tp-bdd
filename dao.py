@@ -64,9 +64,9 @@ class AcheteurDAO:
         # Ajoute un nouvel acheteur dans la base
         conn = self.db.get_connection()
         cursor = conn.cursor()
+        tel = f"'{telephone}'" if telephone else "NULL"
         cursor.execute(
-            "INSERT INTO acheteurs (nom, prenom, email, telephone) VALUES (?, ?, ?, ?)",
-            (nom, prenom, email, telephone)
+            f"INSERT INTO acheteurs (nom, prenom, email, telephone) VALUES ('{nom}', '{prenom}', '{email}', {tel})"
         )
         conn.commit()
         return cursor.lastrowid  # On retourne l'ID du nouvel acheteur
@@ -75,14 +75,14 @@ class AcheteurDAO:
         # Cherche un acheteur par son ID
         conn = self.db.get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM acheteurs WHERE id_acheteur = ?", (id_acheteur,))
+        cursor.execute(f"SELECT * FROM acheteurs WHERE id_acheteur = {id_acheteur}")
         return cursor.fetchone()
     
     def get_by_email(self, email):
         # Cherche un acheteur par son email (pour vérifier s'il existe déjà)
         conn = self.db.get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM acheteurs WHERE email = ?", (email,))
+        cursor.execute(f"SELECT * FROM acheteurs WHERE email = '{email}'")
         return cursor.fetchone()
     
     def get_all(self):
@@ -105,10 +105,9 @@ class EvenementDAO:
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            """INSERT INTO evenements 
+            f"""INSERT INTO evenements 
                (nom, description, date_evenement, heure_debut, lieu, capacite_max, categorie)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (nom, description, date_evenement, heure_debut, lieu, capacite_max, categorie)
+               VALUES ('{nom}', '{description}', '{date_evenement}', '{heure_debut}', '{lieu}', {capacite_max}, '{categorie}')"""
         )
         conn.commit()
         return cursor.lastrowid
@@ -116,7 +115,7 @@ class EvenementDAO:
     def get_by_id(self, id_evenement):
         conn = self.db.get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM evenements WHERE id_evenement = ?", (id_evenement,))
+        cursor.execute(f"SELECT * FROM evenements WHERE id_evenement = {id_evenement}")
         return cursor.fetchone()
     
     def get_all(self):
@@ -131,8 +130,7 @@ class EvenementDAO:
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT * FROM evenements WHERE categorie = ? ORDER BY date_evenement",
-            (categorie,)
+            f"SELECT * FROM evenements WHERE categorie = '{categorie}' ORDER BY date_evenement"
         )
         return cursor.fetchall()
 
@@ -149,9 +147,8 @@ class TypeBilletDAO:
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            """INSERT INTO types_billets (id_evenement, nom_type, prix, quantite_disponible)
-               VALUES (?, ?, ?, ?)""",
-            (id_evenement, nom_type, prix, quantite_disponible)
+            f"""INSERT INTO types_billets (id_evenement, nom_type, prix, quantite_disponible)
+               VALUES ({id_evenement}, '{nom_type}', {prix}, {quantite_disponible})"""
         )
         conn.commit()
         return cursor.lastrowid
@@ -159,7 +156,7 @@ class TypeBilletDAO:
     def get_by_id(self, id_type_billet):
         conn = self.db.get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM types_billets WHERE id_type_billet = ?", (id_type_billet,))
+        cursor.execute(f"SELECT * FROM types_billets WHERE id_type_billet = {id_type_billet}")
         return cursor.fetchone()
     
     def get_by_evenement(self, id_evenement):
@@ -167,8 +164,7 @@ class TypeBilletDAO:
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT * FROM types_billets WHERE id_evenement = ? ORDER BY prix",
-            (id_evenement,)
+            f"SELECT * FROM types_billets WHERE id_evenement = {id_evenement} ORDER BY prix"
         )
         return cursor.fetchall()
     
@@ -177,8 +173,7 @@ class TypeBilletDAO:
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE types_billets SET quantite_disponible = ? WHERE id_type_billet = ?",
-            (nouvelle_quantite, id_type_billet)
+            f"UPDATE types_billets SET quantite_disponible = {nouvelle_quantite} WHERE id_type_billet = {id_type_billet}"
         )
         conn.commit()
 
@@ -195,9 +190,8 @@ class VenteDAO:
         conn = self.db.get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            """INSERT INTO ventes (id_acheteur, id_type_billet, quantite, montant_total)
-               VALUES (?, ?, ?, ?)""",
-            (id_acheteur, id_type_billet, quantite, montant_total)
+            f"""INSERT INTO ventes (id_acheteur, id_type_billet, quantite, montant_total)
+               VALUES ({id_acheteur}, {id_type_billet}, {quantite}, {montant_total})"""
         )
         conn.commit()
         return cursor.lastrowid
@@ -224,19 +218,19 @@ class VenteDAO:
         # Récupère une vente par son ID (pour la suppression)
         conn = self.db.get_connection()
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT v.*, tb.prix 
             FROM ventes v
             JOIN types_billets tb ON v.id_type_billet = tb.id_type_billet
-            WHERE v.id_vente = ?
-        """, (id_vente,))
+            WHERE v.id_vente = {id_vente}
+        """)
         return cursor.fetchone()
     
     def delete(self, id_vente):
         # Supprime une vente de la base
         conn = self.db.get_connection()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM ventes WHERE id_vente = ?", (id_vente,))
+        cursor.execute(f"DELETE FROM ventes WHERE id_vente = {id_vente}")
         conn.commit()
         return cursor.rowcount > 0  # True si ça a supprimé quelque chose
 
@@ -314,7 +308,7 @@ class StatsDAO:
         # Top des meilleurs clients
         conn = self.db.get_connection()
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT a.nom || ' ' || a.prenom AS acheteur,
                    COUNT(v.id_vente) AS nombre_achats,
                    SUM(v.quantite) AS total_billets,
@@ -323,8 +317,8 @@ class StatsDAO:
             JOIN ventes v ON a.id_acheteur = v.id_acheteur
             GROUP BY a.id_acheteur
             ORDER BY total_depense DESC
-            LIMIT ?
-        """, (limit,))
+            LIMIT {limit}
+        """)
         return cursor.fetchall()
     
     def get_ventes_par_categorie(self):
