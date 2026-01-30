@@ -1,4 +1,3 @@
-# services.py - Ridwan & Sébastien
 # C'est la couche "métier" : on gère la logique de l'application ici
 # Elle fait le lien entre l'interface graphique et les requêtes SQL (dao.py)
 
@@ -21,9 +20,8 @@ class BilletterieService:
         self.vente_dao = VenteDAO()
         self.stats_dao = StatsDAO()
     
-    # =====================
+        
     # Gestion des acheteurs
-    # =====================
     
     def inscrire_acheteur(self, nom, prenom, email, telephone=None):
         # On vérifie que les champs obligatoires sont remplis
@@ -48,9 +46,7 @@ class BilletterieService:
         # Transforme les résultats en liste de dictionnaires
         return [dict(a) for a in self.acheteur_dao.get_all()]
     
-    # =====================
     # Gestion des événements
-    # =====================
     
     def creer_evenement(self, nom, description, date_evenement, heure_debut, 
                         lieu, capacite_max, categorie):
@@ -79,9 +75,8 @@ class BilletterieService:
     def lister_evenements_par_categorie(self, categorie):
         return [dict(e) for e in self.evenement_dao.get_by_categorie(categorie)]
     
-    # =====================
     # Gestion des billets
-    # =====================
+
     
     def creer_type_billet(self, id_evenement, nom_type, prix, quantite):
         if prix < 0:
@@ -102,9 +97,9 @@ class BilletterieService:
     def lister_types_billets_evenement(self, id_evenement):
         return [dict(t) for t in self.type_billet_dao.get_by_evenement(id_evenement)]
     
-    # =====================
+ 
     # Gestion des ventes
-    # =====================
+  
     
     def effectuer_vente(self, id_acheteur, id_type_billet, quantite):
         # On vérifie que l'acheteur existe
@@ -158,9 +153,8 @@ class BilletterieService:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    # =====================
+
     # Statistiques
-    # =====================
     
     def calculer_chiffre_affaires_total(self):
         # On récupère le CA et le nombre de billets vendus
@@ -188,7 +182,7 @@ class BilletterieService:
         return [dict(r) for r in self.stats_dao.get_ventes_par_categorie()]
     
     def calculer_indicateurs_avances(self):
-        # Ici on fait des calculs en Python (pas en SQL)
+        # Ici on fait des calculs en Python 
         # C'est pour montrer qu'on peut aussi traiter les données côté code
         ca = self.stats_dao.get_chiffre_affaires_total()
         qte = self.stats_dao.get_quantite_totale_vendue()

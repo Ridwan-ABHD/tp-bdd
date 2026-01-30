@@ -1,5 +1,4 @@
 -- Schéma de la base de données - Billetterie locale
--- Auteurs : Ridwan & Sébastien
 
 -- Suppression des tables (ordre inverse des dépendances)
 DROP TABLE IF EXISTS ventes;

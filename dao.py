@@ -1,14 +1,10 @@
-# dao.py - Ridwan & Sébastien
 # C'est ici qu'on fait toutes les requêtes SQL vers la base de données
-# On utilise des ? dans les requêtes pour éviter les injections SQL (c'est important!)
 
 import sqlite3
 from config import DATABASE_PATH, SCHEMA_PATH
 
 
-# ===========================================
-# Connexion à la base de données
-# ===========================================
+# --- Connexion à la base de données ---
 
 class DatabaseConnection:
     """
@@ -57,9 +53,7 @@ def init_database():
         return False
 
 
-# ===========================================
-# DAO Acheteurs - pour gérer les clients
-# ===========================================
+# --- DAO Acheteurs ---
 
 class AcheteurDAO:
     
@@ -99,9 +93,7 @@ class AcheteurDAO:
         return cursor.fetchall()
 
 
-# ===========================================
-# DAO Evenements - pour gérer les events
-# ===========================================
+# --- DAO Evenements ---
 
 class EvenementDAO:
     
@@ -145,9 +137,7 @@ class EvenementDAO:
         return cursor.fetchall()
 
 
-# ===========================================
-# DAO Types de billets - les différents tarifs
-# ===========================================
+# --- DAO Types de billets ---
 
 class TypeBilletDAO:
     
@@ -193,9 +183,7 @@ class TypeBilletDAO:
         conn.commit()
 
 
-# ===========================================
-# DAO Ventes - les achats de billets
-# ===========================================
+# --- DAO Ventes ---
 
 class VenteDAO:
     
@@ -253,9 +241,7 @@ class VenteDAO:
         return cursor.rowcount > 0  # True si ça a supprimé quelque chose
 
 
-# ===========================================
-# DAO Stats - pour les statistiques et calculs
-# ===========================================
+# --- DAO Stats ---
 
 class StatsDAO:
     

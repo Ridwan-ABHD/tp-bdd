@@ -1,6 +1,4 @@
-# config.py - Ridwan & Sébastien
 # Ici on met les chemins vers nos fichiers importants
-
 import os
 
 # On récupère le dossier où se trouve ce fichier config.py

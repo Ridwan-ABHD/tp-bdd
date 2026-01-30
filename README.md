@@ -1,41 +1,34 @@
-# 🎫 Billetterie Locale - TP Base de Données
+# Billetterie Locale - TP Base de Données
 
-## 👥 Auteurs
-- **Ridwan**
-- **Sébastien**
-
-## 📅 Date
-Janvier 2026
+**Auteurs :** Ridwan & Sébastien  
+**Date :** Janvier 2026
 
 ---
 
-## 🎯 Description du Projet
+## Description
 
 Application de gestion de billetterie locale pour événements (concerts, conférences, spectacles).
 
-**Technologies utilisées :**
-- **SQLite** : Base de données locale (fichier .db)
-- **Python 3** : Backend avec le module `sqlite3` intégré
-- **Tkinter** : Interface graphique (aucun package externe)
+**Technologies :**
+- SQLite (base de données locale)
+- Python 3 avec le module `sqlite3`
+- Tkinter pour l'interface graphique
 
 ---
 
-## 🚀 Lancement du Projet
+## Lancement
 
 ```bash
-# 1. Aller dans le dossier
-cd billetterie
-
-# 2. Initialiser les données de test (1ère fois seulement)
+# 1. Initialiser les données de test (1ère fois)
 python insert_data.py
 
-# 3. Lancer l'application
+# 2. Lancer l'application
 python app.py
 ```
 
 ---
 
-## 📁 Structure du Projet
+## Structure du Projet
 
 ```
 billetterie/
@@ -45,29 +38,27 @@ billetterie/
 ├── services.py       # Logique métier et validations
 ├── app.py            # Interface graphique Tkinter
 ├── insert_data.py    # Insertion des données de test
-├── billetterie.db    # Base SQLite (générée automatiquement)
-└── README.md         # Ce fichier
+├── billetterie.db    # Base SQLite (générée auto)
+└── README.md
 ```
 
 ### Architecture 3 couches
 
 ```
-┌─────────────────────────────────┐
-│    Interface (app.py)           │  ← Tkinter, affichage
-├─────────────────────────────────┤
-│    Services (services.py)       │  ← Validations, calculs Python
-├─────────────────────────────────┤
-│    DAO (dao.py)                 │  ← Requêtes SQL paramétrées
-├─────────────────────────────────┤
-│    SQLite (billetterie.db)      │  ← Base de données
-└─────────────────────────────────┘
+Interface (app.py)      → Tkinter, affichage
+        ↓
+Services (services.py)  → Validations, calculs
+        ↓
+DAO (dao.py)            → Requêtes SQL
+        ↓
+SQLite (billetterie.db) → Base de données
 ```
 
 ---
 
-## 🗄️ Base de Données
+## Base de Données
 
-### Tables (4)
+### Tables
 
 | Table | Description |
 |-------|-------------|
@@ -85,68 +76,55 @@ acheteurs ──────┐
             ventes ◄─── types_billets ◄─── evenements
 ```
 
-- `types_billets.id_evenement` → `evenements.id_evenement` (FK)
-- `ventes.id_acheteur` → `acheteurs.id_acheteur` (FK)
-- `ventes.id_type_billet` → `types_billets.id_type_billet` (FK)
+- `types_billets.id_evenement` → `evenements.id_evenement`
+- `ventes.id_acheteur` → `acheteurs.id_acheteur`
+- `ventes.id_type_billet` → `types_billets.id_type_billet`
 
 ---
 
-## 🔧 Fonctionnalités
+## Fonctionnalités
 
-### Gestion (CRUD)
-- ➕ Ajouter une vente
-- 🗑️ Supprimer une vente
-- 📜 Lister les ventes
-- 🎭 Lister les événements
-- 👥 Lister les acheteurs
+**Gestion :**
+- Ajouter / supprimer une vente
+- Lister les ventes, événements, acheteurs
 
-### Statistiques (Agrégats SQL)
-- 💰 Chiffre d'affaires total (`SUM`)
-- 🎯 CA par événement (`GROUP BY`)
-- 📈 Taux de remplissage (%)
-- 🏆 Top billets vendus
-- 👑 Top acheteurs
+**Statistiques :**
+- Chiffre d'affaires total (SUM)
+- CA par événement (GROUP BY)
+- Taux de remplissage
+- Top billets vendus
+- Top acheteurs
 
 ---
 
-## 🔒 Sécurité
+## Sécurité
 
-### Requêtes paramétrées (anti-injection SQL)
+Requêtes paramétrées pour éviter les injections SQL :
 
 ```python
-# ✅ CORRECT - avec des ?
+# Correct
 cursor.execute("SELECT * FROM acheteurs WHERE id = ?", (id,))
 
-# ❌ INTERDIT - concaténation
+# A éviter
 cursor.execute("SELECT * FROM acheteurs WHERE id = " + id)
 ```
 
 ---
 
-## 📊 Données de Test
+## Données de Test
 
 Le script `insert_data.py` crée :
 - 10 acheteurs
-- 8 événements (3 concerts, 2 conférences, 3 spectacles)
+- 8 événements
 - 24 types de billets
 - 50 ventes
 
 ---
 
-## 🎨 Interface
+## Points Techniques
 
-- Design dark mode moderne
-- Interface responsive (s'adapte à l'écran)
-- Sidebar avec boutons d'action
-- Cartes de statistiques animées
-
----
-
-## 📝 Points Techniques Importants
-
-1. **`import sqlite3`** : Module Python intégré (pas MySQL)
-2. **Pattern Singleton** : Une seule connexion à la base
-3. **Clés étrangères** : `FOREIGN KEY ... ON DELETE CASCADE`
-4. **Index** : Sur les colonnes fréquemment recherchées
-5. **`PRAGMA foreign_keys = ON`** : Active les FK dans SQLite
-6. **Chemins absolus** : `os.path.abspath(__file__)` pour éviter les erreurs
+- `import sqlite3` : module Python intégré
+- Pattern Singleton pour la connexion
+- Clés étrangères avec ON DELETE CASCADE
+- `PRAGMA foreign_keys = ON` pour activer les FK
+- Chemins absolus avec `os.path.abspath(__file__)`
