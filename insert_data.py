@@ -1,5 +1,4 @@
 # Script d'insertion de données de test
-# Auteurs : Ridwan & Sébastien
 
 from dao import init_database, AcheteurDAO, EvenementDAO, TypeBilletDAO, VenteDAO, DatabaseConnection
 from datetime import datetime, timedelta

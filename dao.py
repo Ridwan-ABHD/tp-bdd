@@ -4,7 +4,7 @@ import sqlite3
 from config import DATABASE_PATH, SCHEMA_PATH
 
 
-# --- Connexion à la base de données ---
+# Connexion à la base de données 
 
 class DatabaseConnection:
     """
@@ -93,7 +93,7 @@ class AcheteurDAO:
         return cursor.fetchall()
 
 
-# --- DAO Evenements ---
+# DAO Evenements 
 
 class EvenementDAO:
     
@@ -135,7 +135,7 @@ class EvenementDAO:
         return cursor.fetchall()
 
 
-# --- DAO Types de billets ---
+# DAO Types de billets 
 
 class TypeBilletDAO:
     
@@ -178,7 +178,7 @@ class TypeBilletDAO:
         conn.commit()
 
 
-# --- DAO Ventes ---
+# DAO Ventes 
 
 class VenteDAO:
     
@@ -235,7 +235,7 @@ class VenteDAO:
         return cursor.rowcount > 0  # True si ça a supprimé quelque chose
 
 
-# --- DAO Stats ---
+# DAO Stats 
 
 class StatsDAO:
     

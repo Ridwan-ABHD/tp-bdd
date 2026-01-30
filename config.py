@@ -1,8 +1,9 @@
 # Ici on met les chemins vers nos fichiers importants
+
 import os
 
 # On récupère le dossier où se trouve ce fichier config.py
-# Comme ça peu importe d'où on lance le script, ça marchera toujours
+
 DOSSIER_PROJET = os.path.dirname(os.path.abspath(__file__))
 
 # Chemin vers la base de données SQLite

@@ -1,5 +1,4 @@
 # C'est la couche "métier" : on gère la logique de l'application ici
-# Elle fait le lien entre l'interface graphique et les requêtes SQL (dao.py)
 
 from dao import (AcheteurDAO, EvenementDAO, TypeBilletDAO, VenteDAO, 
                  StatsDAO, DatabaseConnection, init_database)
@@ -183,7 +182,6 @@ class BilletterieService:
     
     def calculer_indicateurs_avances(self):
         # Ici on fait des calculs en Python 
-        # C'est pour montrer qu'on peut aussi traiter les données côté code
         ca = self.stats_dao.get_chiffre_affaires_total()
         qte = self.stats_dao.get_quantite_totale_vendue()
         ca_evt = self.calculer_ca_par_evenement()
@@ -210,5 +208,4 @@ class BilletterieService:
         }
     
     def fermer_connexion(self):
-        # On ferme proprement la connexion à la base
         DatabaseConnection().close()

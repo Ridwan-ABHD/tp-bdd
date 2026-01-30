@@ -1,5 +1,4 @@
-# Interface graphique Tkinter - Billetterie
-# Auteurs : Ridwan & Sébastien
+# Interface graphique Tkinter
 
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
